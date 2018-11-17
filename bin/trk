@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+
+import trackerino.trackerino
+
+
+trackerino.trackerino.app()
