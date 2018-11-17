@@ -28,7 +28,7 @@ class DB:
             activity = self.activity_id(activity)
         with self.connection as csr:
             csr.execute(f'''UPDATE {self.activities_table_name} SET
-                            name = {name}
+                            name = '{name}'
                             WHERE id = {activity};''')
 
     def add_activity(self, name):
@@ -47,7 +47,7 @@ class DB:
     def activity_id(self, activity_name):
         with self.connection as csr:
             value = csr.execute(f'''SELECT id FROM {self.activities_table_name}
-                                    WHERE name = '{entry}';''')
+                                    WHERE name = '{activity_name}';''')
         return list(value)[0][0]
 
     def add_entry(self, activity):
@@ -63,21 +63,22 @@ class DB:
                             );''')
 
     def last_entry(self):
-        return self.entries('LIMIT 1')[0]
+        return self.entries()[0]
 
     def entries(self, condition=''):
         with self.connection as csr:
             value = csr.execute(f'''SELECT {self.entries_table_name}.id, act.name, date_time FROM {self.entries_table_name}
                                     INNER JOIN {self.activities_table_name} act ON act.id=activity
+                                    {condition}
                                     ORDER BY {self.entries_table_name}.date_time DESC
-                                    {condition}''')
+                                    ;''')
         return list(value)
 
     def show_entry(self, id):
-        return self.entries(f'WHERE {self.entries_table_name}.id = {id};')[0]
+        return self.entries(f'WHERE {self.entries_table_name}.id = {id}')[0]
 
     def week_entries(self, change=0):
-        return self.entries(f"WHERE strftime('%Y-%W', datetime(date_time)) = strftime('%Y-%W', datetime('now', '-{change} weeks'))")
+        return self.entries(f"WHERE strftime('%Y-%W', datetime(date_time)) = strftime('%Y-%W', datetime('now', '-{change*7} days'))")
 
     def day_entries(self, change=0):
         return self.entries(f"WHERE strftime('%Y-%j', datetime(date_time)) = strftime('%Y-%j', datetime('now', '-{change} days'))")
@@ -85,21 +86,11 @@ class DB:
     def activity_entries(self, activity):
         if type(activity) is str:
             activity = self.activity_id(activity)
-        return self.entries(f"WHERE strftime('%Y-%j', datetime(date_time)) = strftime('%Y-%j', datetime('now', '-{change} days'))")
+        return self.entries(f"WHERE activity={activity}")
 
     def edit_entry(self, id, date_time):
         with self.connection as csr:
             csr.execute(f'''UPDATE {self.entries_table_name}
-                                    SET date_time = {date_time}
+                                    SET date_time = '{date_time}'
                                     WHERE id = {id};''')
-
-
-
-
-
-
-
-
-
-
 
