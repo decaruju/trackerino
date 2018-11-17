@@ -1,5 +1,6 @@
 import sqlite3
 import os.path
+import re
 
 
 class DB:
@@ -45,6 +46,8 @@ class DB:
         return list(activities)
 
     def activity_id(self, activity_name):
+        if re.match(r'\d+', activity_name):
+            return int(activity_name)
         with self.connection as csr:
             value = csr.execute(f'''SELECT id FROM {self.activities_table_name}
                                     WHERE name = '{activity_name}';''')
@@ -59,7 +62,7 @@ class DB:
                                 date_time
                             ) VALUES (
                                 '{activity}',
-                                datetime('now')
+                                datetime('now', 'localtime')
                             );''')
 
     def last_entry(self):
@@ -79,10 +82,10 @@ class DB:
         return self.entries(f'WHERE {self.entries_table_name}.id = {id}')[0]
 
     def week_entries(self, change=0):
-        return self.entries(f"WHERE strftime('%Y-%W', datetime(date_time)) = strftime('%Y-%W', datetime('now', '-{change*7} days'))")
+        return self.entries(f"WHERE strftime('%Y-%W', datetime(date_time, 'localtime')) = strftime('%Y-%W', datetime('now', '-{change*7} days', 'localtime'))")
 
     def day_entries(self, change=0):
-        return self.entries(f"WHERE strftime('%Y-%j', datetime(date_time)) = strftime('%Y-%j', datetime('now', '-{change} days'))")
+        return self.entries(f"WHERE strftime('%Y-%j', datetime(date_time, 'localtime')) = strftime('%Y-%j', datetime('now', '-{change} days', 'localtime'))")
 
     def activity_entries(self, activity):
         if type(activity) is str:
