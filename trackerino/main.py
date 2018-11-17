@@ -26,7 +26,7 @@ def change():
         return
     try:
         last = db.last_entry()
-        print(f'You worked on {last[1]} for {datetime.datetime.fromisoformat(last[2]) - datetime.datetime.now()}')
+        print(f'You worked on {last[1]} for {datetime.datetime.now() - datetime.datetime.fromisoformat(last[2])}')
     except Exception as e:
         pass
     db.add_entry(sys.argv[2])

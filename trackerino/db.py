@@ -4,7 +4,7 @@ import re
 
 
 class DB:
-    def __init__(self, filename="trackerino.sqlite3", entries_table_name="entries", activities_table_name="activities"):
+    def __init__(self, filename=os.path.expanduser("~/trackerino.sqlite3"), entries_table_name="entries", activities_table_name="activities"):
         self.connection = sqlite3.connect(filename)
         self.entries_table_name = entries_table_name
         self.activities_table_name = activities_table_name
