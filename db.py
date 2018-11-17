@@ -63,14 +63,15 @@ class DB:
                             );''')
 
     def last_entry(self):
-        return self.entries()[0]
+        return self.entries(limit="LIMIT 1")[0]
 
-    def entries(self, condition=''):
+    def entries(self, condition='', limit=''):
         with self.connection as csr:
             value = csr.execute(f'''SELECT {self.entries_table_name}.id, act.name, date_time FROM {self.entries_table_name}
                                     INNER JOIN {self.activities_table_name} act ON act.id=activity
                                     {condition}
                                     ORDER BY {self.entries_table_name}.date_time DESC
+                                    {limit}
                                     ;''')
         return list(value)
 
