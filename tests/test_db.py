@@ -1,4 +1,4 @@
-from ..db import DB
+from trackerino.db import DB
 import datetime
 import pytest
 

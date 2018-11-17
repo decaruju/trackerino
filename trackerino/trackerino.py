@@ -29,9 +29,12 @@ class app:
 
 
     def usage(self):
-        print('USAGE...')
-        print('Defaulting to status')
-        self.status()
+        print('trackerino time tracker')
+        print('---------------------------------')
+        print()
+        print('Expected one option of [(a)ctivities, (e)ntries, (c)hange, (r)eport, (s)tatus]')
+        print('To add an activity, use "trk a <name-of-activity>"')
+        print('To add an entry, use "trk e <name-or-id-of-activity>"')
 
     def status(self):
         last_entry = self.db.last_entry()
@@ -40,7 +43,33 @@ class app:
         print(f'You started working on it {timeago.format(date_time, datetime.datetime.now())}')
 
     def report(self):
-        pass
+        if len(sys.argv) == 2:
+            print('Defaulting to reporting today')
+            entries = self.db.day_entries()
+        elif len(sys.argv) == 3:
+            if sys.argv[2] in ('w', 'week', ):
+                entries = self.db.week_entries()
+            elif sys.argv[2] in ('d', 'day', ):
+                entries = self.db.day_entries()
+
+        if len(entries) == 0:
+            print('You have no entries for this period')
+            return
+        day = datetime.datetime.fromisoformat(entries[0][2].split()[0])
+
+        print(f'Your first entry is at {str(entries[0][2]).split()[1]}')
+        entries.insert(0, (0, 'nothing', day.isoformat()))
+        entries.append((0, 'nothing', datetime.datetime.now().isoformat()))
+
+        time_spent = defaultdict(datetime.timedelta)
+        for entry1, entry2 in zip(entries[:-1], entries[1:]):
+            time_spent[entry1[1]] += (datetime.datetime.fromisoformat(entry2[2]) - datetime.datetime.fromisoformat(entry1[2]))
+        for activity, duration in time_spent.items():
+            if activity == 'nothing':
+                continue
+            print(f'You spent {str(duration).split(".")[0]} on {activity}')
+            
+            
 
     def change(self):
         if len(sys.argv) == 2:
@@ -62,6 +91,12 @@ class app:
             print('\n'.join(f'ID: {entry[0]}, Activity: {entry[1]}, Start: {entry[2]}' for entry in self.db.week_entries()))
         elif sys.argv[2] in ('d', 'day', ):
             print('\n'.join(f'ID: {entry[0]}, Activity: {entry[1]}, Start: {entry[2]}' for entry in self.db.day_entries()))
+        elif sys.argv[2] in ('e', 'edit', ):
+            if len(sys.argv) <= 4:
+                print("To edit a task, add its ID and the new datetime")
+            else:
+                self.db.edit_entry(sys.argv[3],  sys.argv[4])
+
         else:
             print('e options expects one of [d (day), w (week)]')
 
