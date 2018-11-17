@@ -113,5 +113,8 @@ def test_week_entries_returns_entries_of_the_week(db):
 def test_activity_entries_by_id_returns_the_entries(db):
     assert len(db.activity_entries(1)) == 3
 
+def test_activity_entries_by_str_id_returns_the_entries(db):
+    assert len(db.activity_entries('1')) == 3
+
 def test_activity_entries_by_name_returns_the_entries(db):
     assert len(db.activity_entries(activity_name)) == 3
